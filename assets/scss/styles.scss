@@ -1,5 +1,17 @@
+@import "./body.scss";
+
 $color: red;
 
+@keyframes coding {
+  from {
+    color: $color;
+  }
+  to {
+    color: blue;
+  }
+}
+
 body {
-  background-color: $color;
+  //   background-color: $color;
+  position: sticky;
 }
