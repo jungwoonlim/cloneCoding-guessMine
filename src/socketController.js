@@ -5,9 +5,9 @@ let sockets = [];
 let inProgress = false;
 let word = null;
 
-const chooseLeader = () => sockets[Math.floor(Math.random * sockets.length)];
+const chooseLeader = () => sockets[Math.floor(Math.random() * sockets.length)];
 
-const socketContoller = (socket, io) => {
+const socketController = (socket, io) => {
   const broadcast = (event, data) => socket.broadcast.emit(event, data);
   const superBroadcast = (event, data) => io.emit(event, data);
   const sendPlayerUpdate = () =>
@@ -17,7 +17,13 @@ const socketContoller = (socket, io) => {
       inProgress = true;
       const leader = chooseLeader();
       word = chooseWord();
+      io.to(leader.id).emit(events.leaderNotif, { word });
+      superBroadcast(events.gameStarted);
     }
+  };
+
+  const endGame = () => {
+    inProgress = false;
   };
 
   socket.on(events.setNickname, ({ nickname }) => {
@@ -25,11 +31,16 @@ const socketContoller = (socket, io) => {
     sockets.push({ id: socket.id, points: 0, nickname: nickname });
     broadcast(events.newUser, { nickname });
     sendPlayerUpdate();
-    startGame();
+    if (sockets.length === 1) {
+      startGame();
+    }
   });
 
   socket.on(events.disconnect, () => {
     sockets = sockets.filter(aSocket => aSocket.id !== socket.id);
+    if (sockets.length === 1) {
+      endGame();
+    }
     broadcast(events.disconnected, { nickname: socket.nickname });
     sendPlayerUpdate();
   });
@@ -44,7 +55,6 @@ const socketContoller = (socket, io) => {
 
   socket.on(events.strokePath, ({ x, y, color }) => {
     broadcast(events.strokedPath, { x, y, color });
-    console.log(x, y);
   });
 
   socket.on(events.fill, ({ color }) => {
@@ -52,4 +62,4 @@ const socketContoller = (socket, io) => {
   });
 };
 
-export default socketContoller;
+export default socketController;
