@@ -61,3 +61,8 @@ typings/
 .next
 
 package-lock.json
+
+# static
+static
+
+.eslint.js
