@@ -17,8 +17,10 @@ const socketController = (socket, io) => {
       inProgress = true;
       const leader = chooseLeader();
       word = chooseWord();
-      io.to(leader.id).emit(events.leaderNotif, { word });
-      superBroadcast(events.gameStarted);
+      setTimeout(() => {
+        superBroadcast(events.gameStarted);
+        io.to(leader.id).emit(events.leaderNotif, { word });
+      }, 2000);
     }
   };
 
@@ -31,7 +33,7 @@ const socketController = (socket, io) => {
     sockets.push({ id: socket.id, points: 0, nickname: nickname });
     broadcast(events.newUser, { nickname });
     sendPlayerUpdate();
-    if (sockets.length === 1) {
+    if (sockets.length === 2) {
       startGame();
     }
   });
